@@ -139,10 +139,10 @@ export default function Dashboard() {
             <DialogTitle className="text-2xl">O que deseja adicionar?</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
-            <Button onClick={() => { setShowAddDialog(false); navigate("/consultas/novo"); }} size="lg" variant="outline" className="w-full justify-start text-lg h-16 border-2">
+            <Button onClick={() => { setShowAddDialog(false); navigate("/consultas"); }} size="lg" variant="outline" className="w-full justify-start text-lg h-16 border-2">
               <Calendar className="mr-3 h-6 w-6" /> Nova Consulta
             </Button>
-            <Button onClick={() => { setShowAddDialog(false); navigate("/medicamentos/novo"); }} size="lg" variant="outline" className="w-full justify-start text-lg h-16 border-2">
+            <Button onClick={() => { setShowAddDialog(false); navigate("/medicamentos"); }} size="lg" variant="outline" className="w-full justify-start text-lg h-16 border-2">
               <Pill className="mr-3 h-6 w-6" /> Novo Medicamento
             </Button>
           </div>
