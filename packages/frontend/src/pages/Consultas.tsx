@@ -57,7 +57,7 @@ const initialFormData = {
 export default function Consultas() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
-  
+
   // Estados para controlar a lista e a interface
   const [consultas, setConsultas] = useState<Consulta[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,11 +68,11 @@ export default function Consultas() {
   const [editingConsulta, setEditingConsulta] = useState<Consulta | null>(null);
   const [consultaToDelete, setConsultaToDelete] = useState<Consulta | null>(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
-
+  const apiUrl = import.meta.env.VITE_API_URL;
   // Função para buscar os dados da API
   const fetchConsultas = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/consultas');
+      const response = await fetch(`${apiUrl}api/consultas`);
       if (!response.ok) throw new Error('Falha ao buscar consultas');
       const data = await response.json();
       setConsultas(data);
@@ -94,6 +94,7 @@ export default function Consultas() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     const dataHoraISO = new Date(`${formData.data}T${formData.hora}`).toISOString();
     const dataToSend = {
@@ -105,9 +106,9 @@ export default function Consultas() {
     };
 
     const url = editingConsulta
-      ? `http://localhost:3001/api/consultas/${editingConsulta.id}`
-      : 'http://localhost:3001/api/consultas';
-    
+      ? `${apiUrl}api/consultas/${editingConsulta.id}`
+      : `${apiUrl}api/consultas`;
+
     const method = editingConsulta ? 'PUT' : 'POST';
 
     try {
@@ -150,8 +151,11 @@ export default function Consultas() {
 
   const handleDeleteConfirm = async () => {
     if (!consultaToDelete) return;
+
+    const apiUrl = import.meta.env.VITE_API_URL;
+
     try {
-      const response = await fetch(`http://localhost:3001/api/consultas/${consultaToDelete.id}`, {
+      const response = await fetch(`${apiUrl}api/consultas/${consultaToDelete.id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Falha ao deletar a consulta');
@@ -166,8 +170,9 @@ export default function Consultas() {
   };
 
   const handleUpdateStatus = async (id: string, status: boolean) => {
+    const apiUrl = import.meta.env.VITE_API_URL;
     try {
-      const response = await fetch(`http://localhost:3001/api/consultas/${id}/status`, {
+      const response = await fetch(`${apiUrl}api/consultas/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ compareceu: status }),

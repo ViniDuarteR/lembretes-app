@@ -28,7 +28,7 @@ const initialFormData = {
   horario: "",
   dataFinal: ""
 };
-
+const apiUrl = import.meta.env.VITE_API_URL;
 export default function Medicamentos() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
@@ -42,7 +42,7 @@ export default function Medicamentos() {
 
   const fetchMedicamentos = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/medicamentos');
+      const response = await fetch(`${apiUrl}/api/medicamentos`);
       if (!response.ok) throw new Error('Falha ao buscar medicamentos');
       const data = await response.json();
       setMedicamentos(data);
@@ -73,8 +73,8 @@ export default function Medicamentos() {
       dataFinal: formData.dataFinal ? new Date(formData.dataFinal).toISOString() : null,
     };
     const url = editingMedicamento
-      ? `http://localhost:3001/api/medicamentos/${editingMedicamento.id}`
-      : 'http://localhost:3001/api/medicamentos';
+      ? `${apiUrl}/api/medicamentos/${editingMedicamento.id}`
+      : `${apiUrl}/api/medicamentos`;
     const method = editingMedicamento ? 'PUT' : 'POST';
     try {
       const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSend) });
@@ -106,7 +106,7 @@ export default function Medicamentos() {
   const handleDeleteConfirm = async () => {
     if (!medicamentoToDelete) return;
     try {
-      const response = await fetch(`http://localhost:3001/api/medicamentos/${medicamentoToDelete.id}`, { method: 'DELETE' });
+      const response = await fetch(`${apiUrl}/api/medicamentos/${medicamentoToDelete.id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Falha ao deletar');
       toast.success("Lembrete removido com sucesso!");
       fetchMedicamentos();
@@ -171,7 +171,7 @@ export default function Medicamentos() {
                   ) : (
                     <p className="text-lg text-muted-foreground pt-2">Tratamento finalizado</p>
                   )}
-                  
+
                   {medicamento.dataFinal && <p className="text-sm text-muted-foreground">Término em: {format(new Date(medicamento.dataFinal), 'dd/MM/yyyy')}</p>}
                 </div>
               );

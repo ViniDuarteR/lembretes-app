@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   frontend:
     build:
       context: .
       dockerfile: packages/frontend/Dockerfile
     ports:
-      - "8080:80" # Mapeia a porta 8080 do seu PC para a porta 80 do contentor (Nginx)
+      - "8080:80"
     depends_on:
       - backend
     networks:
@@ -17,12 +15,27 @@ services:
       context: .
       dockerfile: packages/backend/Dockerfile
     ports:
-      - "3001:3001" # Mapeia a porta 3001 do seu PC para a porta 3001 do contentor
+      - "3001:3001"
     environment:
-      DATABASE_URL: file:./prisma/dev.db
+      # Agora, o backend dentro do Docker vai falar com a base de dados do Docker
+      DATABASE_URL: "postgresql://vinicius:password@db:5432/lembretes_db"
+    depends_on:
+      - db # Garante que a base de dados inicia antes do backend
+    networks:
+      - lembretes-net
+
+  # --- SERVIÇO DE BASE DE DADOS POSTGRESQL ---
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: vinicius
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: lembretes_db
+    ports:
+      - "5432:5432" # Expõe a porta para a sua máquina local (para o Prisma)
     volumes:
-      # Monta o diretório prisma para persistir a base de dados SQLite
-      - backend-db:/app/packages/backend/prisma
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - lembretes-net
 
@@ -31,4 +44,7 @@ networks:
     driver: bridge
 
 volumes:
-  backend-db: # Define o volume nomeado para a persistência
+  postgres-data: # Volume para persistir os dados da base de dados
+  backend-db:
+    # Este não é mais usado para a DB, mas pode manter para outros fins se quiser
+

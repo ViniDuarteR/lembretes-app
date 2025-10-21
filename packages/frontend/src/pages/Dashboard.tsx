@@ -32,7 +32,7 @@ interface Medicamento {
   frequencia: string;
   dataFinal?: string | null;
 }
-
+const apiUrl = import.meta.env.VITE_API_URL;
 export default function Dashboard() {
   const navigate = useNavigate();
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -46,8 +46,8 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         const [consultasRes, medicamentosRes] = await Promise.all([
-          fetch('http://localhost:3001/api/consultas'),
-          fetch('http://localhost:3001/api/medicamentos')
+          fetch(`${apiUrl}api/consultas`),
+          fetch(`${apiUrl}api/medicamentos`)
         ]);
         if (!consultasRes.ok || !medicamentosRes.ok) {
           throw new Error('Falha ao buscar dados da API');
@@ -82,8 +82,8 @@ export default function Dashboard() {
     .find(m => m.proximoHorario! >= new Date());
 
   const medicamentosHojeCount = medicamentos.filter(m => {
-      const proximo = calcularProximoHorario(m);
-      return proximo && isToday(proximo);
+    const proximo = calcularProximoHorario(m);
+    return proximo && isToday(proximo);
   }).length;
   // --- FIM DA LÓGICA DE PROCESSAMENTO ---
 

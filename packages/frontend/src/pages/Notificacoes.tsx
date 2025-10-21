@@ -27,7 +27,7 @@ interface NotificationItem {
   datetime: Date;
   compareceu?: boolean | null; // Adicionado
 }
-
+const apiUrl = import.meta.env.VITE_API_URL;
 export default function Notificacoes() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,8 +37,8 @@ export default function Notificacoes() {
     const fetchAndProcessData = async () => {
       try {
         const [consultasRes, medicamentosRes] = await Promise.all([
-          fetch('http://localhost:3001/api/consultas'),
-          fetch('http://localhost:3001/api/medicamentos')
+          fetch(`${apiUrl}api/consultas`),
+          fetch(`${apiUrl}api/medicamentos`)
         ]);
 
         if (!consultasRes.ok || !medicamentosRes.ok) {
@@ -103,11 +103,11 @@ export default function Notificacoes() {
       <main className="max-w-screen-xl mx-auto px-6 py-8 space-y-8">
         {error && <p className="text-center text-destructive bg-destructive/10 p-4 rounded-lg">{error}</p>}
         {!loading && !error && notifications.length === 0 && (
-           <div className="text-center py-12">
-             <Bell className="h-20 w-20 mx-auto text-muted-foreground mb-4" />
-             <h2 className="text-2xl font-semibold mb-2">Nenhuma notificação encontrada</h2>
-             <p className="text-lg text-muted-foreground">Adicione consultas e medicamentos para ver os lembretes aqui.</p>
-           </div>
+          <div className="text-center py-12">
+            <Bell className="h-20 w-20 mx-auto text-muted-foreground mb-4" />
+            <h2 className="text-2xl font-semibold mb-2">Nenhuma notificação encontrada</h2>
+            <p className="text-lg text-muted-foreground">Adicione consultas e medicamentos para ver os lembretes aqui.</p>
+          </div>
         )}
 
         {/* Hoje */}
@@ -140,43 +140,43 @@ export default function Notificacoes() {
             <h2 className="text-2xl font-semibold mb-4 text-foreground">Amanhã</h2>
             <div className="space-y-4">
               {tomorrow.map((notification) => (
-                 <Card key={notification.id} className="p-6 hover:shadow-md transition-all">
-                   <div className="flex items-start gap-4">
-                     <div className={`p-3 rounded-2xl ${notification.type === "consulta" ? "bg-primary/10 text-primary" : "bg-success/10 text-success"}`}>
-                       {notification.type === "consulta" ? <Calendar className="h-7 w-7" /> : <Pill className="h-7 w-7" />}
-                     </div>
-                     <div className="flex-1">
-                       <h3 className="text-xl font-semibold mb-1">{notification.title}</h3>
-                       <p className="text-lg text-muted-foreground">
-                         às {format(notification.datetime, "HH:mm", { locale: ptBR })}
-                       </p>
-                     </div>
-                   </div>
-                 </Card>
+                <Card key={notification.id} className="p-6 hover:shadow-md transition-all">
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-2xl ${notification.type === "consulta" ? "bg-primary/10 text-primary" : "bg-success/10 text-success"}`}>
+                      {notification.type === "consulta" ? <Calendar className="h-7 w-7" /> : <Pill className="h-7 w-7" />}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold mb-1">{notification.title}</h3>
+                      <p className="text-lg text-muted-foreground">
+                        às {format(notification.datetime, "HH:mm", { locale: ptBR })}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
               ))}
             </div>
           </section>
         )}
-        
+
         {/* Próximos Dias */}
         {upcoming.length > 0 && (
           <section>
             <h2 className="text-2xl font-semibold mb-4 text-foreground">Próximos Dias</h2>
             <div className="space-y-4">
               {upcoming.map((notification) => (
-                 <Card key={notification.id} className="p-6 hover:shadow-md transition-all">
-                   <div className="flex items-start gap-4">
-                     <div className={`p-3 rounded-2xl ${notification.type === "consulta" ? "bg-primary/10 text-primary" : "bg-success/10 text-success"}`}>
-                       {notification.type === "consulta" ? <Calendar className="h-7 w-7" /> : <Pill className="h-7 w-7" />}
-                     </div>
-                     <div className="flex-1">
-                       <h3 className="text-xl font-semibold mb-1">{notification.title}</h3>
-                       <p className="text-lg text-muted-foreground">
-                         {format(notification.datetime, "dd/MM 'às' HH:mm", { locale: ptBR })}
-                       </p>
-                     </div>
-                   </div>
-                 </Card>
+                <Card key={notification.id} className="p-6 hover:shadow-md transition-all">
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-2xl ${notification.type === "consulta" ? "bg-primary/10 text-primary" : "bg-success/10 text-success"}`}>
+                      {notification.type === "consulta" ? <Calendar className="h-7 w-7" /> : <Pill className="h-7 w-7" />}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold mb-1">{notification.title}</h3>
+                      <p className="text-lg text-muted-foreground">
+                        {format(notification.datetime, "dd/MM 'às' HH:mm", { locale: ptBR })}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
               ))}
             </div>
           </section>
