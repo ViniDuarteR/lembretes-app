@@ -1,0 +1,31 @@
+# Git files
+.git
+.gitignore
+
+# Node modules - crucial to ignore, they'll be installed inside the container
+node_modules
+packages/frontend/node_modules
+packages/backend/node_modules
+
+# Build artifacts
+packages/frontend/dist
+packages/backend/dist
+
+# Env files (keep secrets out of the image)
+.env
+packages/backend/.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Docker files (sometimes useful to ignore if copying context)
+# Dockerfile
+# docker-compose.yml
+# .dockerignore

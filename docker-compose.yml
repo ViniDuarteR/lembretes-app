@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: packages/frontend/Dockerfile
+    ports:
+      - "8080:80" # Mapeia a porta 8080 do seu PC para a porta 80 do contentor (Nginx)
+    depends_on:
+      - backend
+    networks:
+      - lembretes-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: packages/backend/Dockerfile
+    ports:
+      - "3001:3001" # Mapeia a porta 3001 do seu PC para a porta 3001 do contentor
+    environment:
+      DATABASE_URL: file:./prisma/dev.db
+    volumes:
+      # Monta o diretório prisma para persistir a base de dados SQLite
+      - backend-db:/app/packages/backend/prisma
+    networks:
+      - lembretes-net
+
+networks:
+  lembretes-net:
+    driver: bridge
+
+volumes:
+  backend-db: # Define o volume nomeado para a persistência
