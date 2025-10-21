@@ -37,8 +37,8 @@ export default function Notificacoes() {
     const fetchAndProcessData = async () => {
       try {
         const [consultasRes, medicamentosRes] = await Promise.all([
-          fetch(`${apiUrl}api/consultas`),
-          fetch(`${apiUrl}api/medicamentos`)
+          fetch(`${apiUrl}/api/consultas`),
+          fetch(`${apiUrl}/api/medicamentos`)
         ]);
 
         if (!consultasRes.ok || !medicamentosRes.ok) {

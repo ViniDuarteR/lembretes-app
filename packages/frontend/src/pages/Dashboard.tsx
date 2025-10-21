@@ -46,8 +46,8 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         const [consultasRes, medicamentosRes] = await Promise.all([
-          fetch(`${apiUrl}api/consultas`),
-          fetch(`${apiUrl}api/medicamentos`)
+          fetch(`${apiUrl}/api/consultas`),
+          fetch(`${apiUrl}/api/medicamentos`)
         ]);
         if (!consultasRes.ok || !medicamentosRes.ok) {
           throw new Error('Falha ao buscar dados da API');

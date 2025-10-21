@@ -72,7 +72,7 @@ export default function Consultas() {
   // Função para buscar os dados da API
   const fetchConsultas = async () => {
     try {
-      const response = await fetch(`${apiUrl}api/consultas`);
+      const response = await fetch(`${apiUrl}/api/consultas`);
       if (!response.ok) throw new Error('Falha ao buscar consultas');
       const data = await response.json();
       setConsultas(data);
@@ -106,8 +106,8 @@ export default function Consultas() {
     };
 
     const url = editingConsulta
-      ? `${apiUrl}api/consultas/${editingConsulta.id}`
-      : `${apiUrl}api/consultas`;
+      ? `${apiUrl}/api/consultas/${editingConsulta.id}`
+      : `${apiUrl}/api/consultas`;
 
     const method = editingConsulta ? 'PUT' : 'POST';
 
@@ -155,7 +155,7 @@ export default function Consultas() {
     const apiUrl = import.meta.env.VITE_API_URL;
 
     try {
-      const response = await fetch(`${apiUrl}api/consultas/${consultaToDelete.id}`, {
+      const response = await fetch(`${apiUrl}/api/consultas/${consultaToDelete.id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Falha ao deletar a consulta');
@@ -172,7 +172,7 @@ export default function Consultas() {
   const handleUpdateStatus = async (id: string, status: boolean) => {
     const apiUrl = import.meta.env.VITE_API_URL;
     try {
-      const response = await fetch(`${apiUrl}api/consultas/${id}/status`, {
+      const response = await fetch(`${apiUrl}/api/consultas/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ compareceu: status }),
