@@ -10,7 +10,9 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
 
 // Middlewares
-app.use(cors({ origin: 'http://localhost:8080' }));
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
+
+app.use(cors({ origin: frontendUrl }));
 app.use(express.json());
 
 // Rota de Teste
