@@ -147,7 +147,7 @@ JWT_SECRET=<chave secreta>
 ---
 
 ## 📂 Estrutura do Projeto (Simplificada)
-/
+```
 lembretes-app
 ├── packages/
 │   ├── frontend/     # Código React (Páginas, Componentes, Libs)
@@ -157,7 +157,7 @@ lembretes-app
 ├── docker-compose.yml # Base de dados local
 ├── package.json       # Configuração do Monorepo (Workspaces)
 └── README.md          # Este ficheiro
-
+```
 ---
 
 ## 🧾 Licença
