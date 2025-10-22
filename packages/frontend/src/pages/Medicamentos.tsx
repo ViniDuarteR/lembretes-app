@@ -10,8 +10,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "sonner";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { calcularProximoHorario } from "@/lib/dateUtils"; // 1. IMPORTAR A FUNÇÃO UTILITÁRIA
+import { calcularProximoHorario } from "@/lib/dateUtils";
+import { fetchWithAuth } from '@/lib/api';
 
+// Interface para tipar os dados do medicamento
 interface Medicamento {
   id: string;
   nome: string;
@@ -21,6 +23,7 @@ interface Medicamento {
   dataFinal?: string | null;
 }
 
+// Estado inicial do formulário
 const initialFormData = {
   nome: "",
   dosagem: "",
@@ -28,7 +31,10 @@ const initialFormData = {
   horario: "",
   dataFinal: ""
 };
-const apiUrl = import.meta.env.VITE_API_URL;
+
+// Declarar apiUrl uma vez fora do componente
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 export default function Medicamentos() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
@@ -40,16 +46,21 @@ export default function Medicamentos() {
   const [medicamentoToDelete, setMedicamentoToDelete] = useState<Medicamento | null>(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
+  // Função para buscar os dados da API (agora usa fetchWithAuth)
   const fetchMedicamentos = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/medicamentos`);
+      // 2. SUBSTITUIR fetch por fetchWithAuth
+      const response = await fetchWithAuth(`${apiUrl}/api/medicamentos`);
       if (!response.ok) throw new Error('Falha ao buscar medicamentos');
       const data = await response.json();
       setMedicamentos(data);
       setError(null);
-    } catch (err) {
+    } catch (err: any) { // Capturar erro corretamente
       console.error(err);
-      setError('Não foi possível carregar os lembretes.');
+      // Evitar exibir erro 401 (já tratado pelo fetchWithAuth com redirecionamento)
+      if (err.message !== 'Não autorizado ou token expirado.') {
+        setError('Não foi possível carregar os lembretes.');
+      }
     } finally {
       setLoading(false);
     }
@@ -59,6 +70,7 @@ export default function Medicamentos() {
     fetchMedicamentos();
   }, []);
 
+  // Função de Submissão (agora usa fetchWithAuth)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -77,14 +89,22 @@ export default function Medicamentos() {
       : `${apiUrl}/api/medicamentos`;
     const method = editingMedicamento ? 'PUT' : 'POST';
     try {
-      const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSend) });
+      // 3. SUBSTITUIR fetch por fetchWithAuth
+      const response = await fetchWithAuth(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend)
+      });
       if (!response.ok) throw new Error(`Falha ao ${editingMedicamento ? 'atualizar' : 'salvar'}`);
       toast.success(`Lembrete ${editingMedicamento ? 'atualizado' : 'criado'} com sucesso!`);
       setShowAddDialog(false);
       fetchMedicamentos();
-    } catch (err) {
+    } catch (err: any) { // Capturar erro corretamente
       console.error(err);
-      toast.error(`Erro ao ${editingMedicamento ? 'atualizar' : 'salvar'}. Tente novamente.`);
+      // Evitar exibir erro 401 no toast
+      if (err.message !== 'Não autorizado ou token expirado.') {
+        toast.error(`Erro ao ${editingMedicamento ? 'atualizar' : 'salvar'}. Tente novamente.`);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -103,15 +123,21 @@ export default function Medicamentos() {
     setShowAddDialog(true);
   };
 
+  // Função de Deleção (agora usa fetchWithAuth)
   const handleDeleteConfirm = async () => {
     if (!medicamentoToDelete) return;
     try {
-      const response = await fetch(`${apiUrl}/api/medicamentos/${medicamentoToDelete.id}`, { method: 'DELETE' });
+      // 4. SUBSTITUIR fetch por fetchWithAuth
+      const response = await fetchWithAuth(`${apiUrl}/api/medicamentos/${medicamentoToDelete.id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Falha ao deletar');
       toast.success("Lembrete removido com sucesso!");
       fetchMedicamentos();
-    } catch (error) {
-      toast.error("Erro ao remover lembrete.");
+    } catch (err: any) { // Capturar erro corretamente
+      console.error(err);
+      // Evitar exibir erro 401 no toast
+      if (err.message !== 'Não autorizado ou token expirado.') {
+        toast.error("Erro ao remover lembrete.");
+      }
     } finally {
       setShowDeleteAlert(false);
       setMedicamentoToDelete(null);
@@ -128,13 +154,14 @@ export default function Medicamentos() {
     return <div className="flex items-center justify-center min-h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
   }
 
+  // O JSX permanece o mesmo da versão anterior (com cálculo do próximo horário)
   return (
     <div className="min-h-screen pb-24 bg-gradient-to-b from-background to-secondary/20">
       <header className="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
         <div className="max-w-screen-xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3"><Heart className="h-10 w-10 text-primary fill-primary" /><h1 className="text-3xl font-bold">Medicamentos</h1></div>
-            <Button onClick={openAddDialog} size="lg" className="gap-2"><Plus className="h-5 w-5" /> Adicionar</Button>
+            <Button onClick={openAddDialog} size="lg" className="gap-2"><Plus className="h-5 w-5" /></Button>
           </div>
         </div>
       </header>
@@ -145,9 +172,7 @@ export default function Medicamentos() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {medicamentos.map((medicamento) => {
-              // 2. CALCULAR O PRÓXIMO HORÁRIO DENTRO DO LOOP
               const proximoHorario = calcularProximoHorario(medicamento);
-
               return (
                 <div key={medicamento.id} className="bg-card rounded-2xl p-6 border shadow-sm flex flex-col gap-3 relative">
                   <div className="absolute top-4 right-4">
@@ -162,8 +187,6 @@ export default function Medicamentos() {
                   <h3 className="text-2xl font-bold pr-8">{medicamento.nome}</h3>
                   <p className="text-lg text-muted-foreground">Dosagem: {medicamento.dosagem}</p>
                   <p className="text-lg text-muted-foreground">Frequência: {medicamento.frequencia}</p>
-
-                  {/* 3. ATUALIZAR A INTERFACE PARA MOSTRAR O HORÁRIO CORRETO */}
                   {proximoHorario ? (
                     <p className="text-lg font-semibold text-primary pt-2">
                       Próxima dose: {format(proximoHorario, "dd/MM 'às' HH:mm", { locale: ptBR })}
@@ -171,7 +194,6 @@ export default function Medicamentos() {
                   ) : (
                     <p className="text-lg text-muted-foreground pt-2">Tratamento finalizado</p>
                   )}
-
                   {medicamento.dataFinal && <p className="text-sm text-muted-foreground">Término em: {format(new Date(medicamento.dataFinal), 'dd/MM/yyyy')}</p>}
                 </div>
               );
@@ -188,7 +210,7 @@ export default function Medicamentos() {
             <div className="space-y-2"><Label htmlFor="frequencia" className="text-lg">Frequência</Label><Input id="frequencia" value={formData.frequencia} onChange={(e) => setFormData({ ...formData, frequencia: e.target.value })} className="h-14 text-lg" placeholder="Ex: De 8 em 8 horas" required /></div>
             <div className="space-y-2"><Label htmlFor="horario" className="text-lg">Horário de Início</Label><Input id="horario" type="time" value={formData.horario} onChange={(e) => setFormData({ ...formData, horario: e.target.value })} className="h-14 text-lg" required /></div>
             <div className="space-y-2"><Label htmlFor="dataFinal" className="text-lg">Data Final (Opcional)</Label><Input id="dataFinal" type="date" value={formData.dataFinal} onChange={(e) => setFormData({ ...formData, dataFinal: e.target.value })} className="h-14 text-lg" /></div>
-            <Button type="submit" size="lg" className="w-full text-lg h-14" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Salvar Lembrete"}</Button>
+            <Button type="submit" size="lg" className="w-full text-lg h-14" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (editingMedicamento ? 'Salvar Alterações' : 'Salvar Lembrete')}</Button>
           </form>
         </DialogContent>
       </Dialog>

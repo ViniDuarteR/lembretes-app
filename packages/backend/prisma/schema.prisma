@@ -1,31 +1,48 @@
 generator client {
-      provider = "prisma-client-js"
-    }
+  provider = "prisma-client-js"
+}
 
-    datasource db {
+datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-    model Consulta {
-  id            String   @id @default(cuid())
+// NOVO MODELO: User
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique 
+  password  String    
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  consultas    Consulta[]
+  medicamentos Medicamento[]
+}
+
+model Consulta {
+  id            String    @id @default(cuid())
   paciente      String
   especialidade String
   medico        String
   data          DateTime
   endereco      String
   compareceu    Boolean?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  userId        String 
+  user   User   @relation(fields: [userId], references: [id])
 }
 
-    model Medicamento {
-      id            String   @id @default(cuid())
-      nome          String
-      dosagem       String   // Ex: "1 comprimido de 500mg"
-      frequencia    String   // Ex: "A cada 8 horas"
-      horarioInicio DateTime
-      dataFinal     DateTime? // O '?' torna o campo opcional
-      createdAt     DateTime @default(now())
-      updatedAt     DateTime @updatedAt
-    }
+model Medicamento {
+  id            String    @id @default(cuid())
+  nome          String
+  dosagem       String
+  frequencia    String
+  horarioInicio DateTime
+  dataFinal     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  userId        String 
+  user   User   @relation(fields: [userId], references: [id])
+}

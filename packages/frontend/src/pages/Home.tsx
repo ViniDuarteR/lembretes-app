@@ -1,9 +1,22 @@
+import { useState, useEffect } from 'react'; // 1. IMPORTAR HOOKS
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Heart, Calendar, Pill, Bell } from "lucide-react";
 
 export default function Home() {
   const navigate = useNavigate();
+  // 2. ADICIONAR ESTADO PARA CONTROLO DO LOGIN
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // 3. VERIFICAR LOGIN AO CARREGAR A PÁGINA
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []); // O array vazio [] garante que isto só corre uma vez
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
@@ -29,16 +42,39 @@ export default function Home() {
             </p>
           </div>
           
-          <Button 
-            onClick={() => navigate("/dashboard")}
-            size="lg"
-            className="text-xl px-12 py-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-          >
-            Acessar Painel
-          </Button>
+          {/* 4. RENDERIZAÇÃO CONDICIONAL DOS BOTÕES */}
+          {isLoggedIn ? (
+            // Botão para utilizador logado
+            <Button 
+              onClick={() => navigate("/dashboard")}
+              size="lg"
+              className="text-xl px-12 py-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              Acessar Painel
+            </Button>
+          ) : (
+            // Botões para visitante
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={() => navigate("/login")}
+                size="lg"
+                className="text-xl px-12 py-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                Entrar
+              </Button>
+              <Button 
+                onClick={() => navigate("/register")}
+                size="lg"
+                variant="outline"
+                className="text-xl px-12 py-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2"
+              >
+                Criar Conta
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Features Grid */}
+        {/* Features Grid (sem alteração) */}
         <div className="grid md:grid-cols-3 gap-8 mt-20">
           <div className="bg-card p-8 rounded-3xl border border-border shadow-sm hover:shadow-md transition-shadow">
             <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
@@ -49,7 +85,6 @@ export default function Home() {
               Agende e acompanhe todas as consultas médicas em um só lugar
             </p>
           </div>
-
           <div className="bg-card p-8 rounded-3xl border border-border shadow-sm hover:shadow-md transition-shadow">
             <div className="bg-success/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
               <Pill className="h-8 w-8 text-success" />
@@ -59,7 +94,6 @@ export default function Home() {
               Lembretes automáticos para nunca esquecer seus remédios
             </p>
           </div>
-
           <div className="bg-card p-8 rounded-3xl border border-border shadow-sm hover:shadow-md transition-shadow">
             <div className="bg-accent/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
               <Bell className="h-8 w-8 text-accent" />
@@ -72,7 +106,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Footer */}
+      {/* Footer (sem alteração) */}
       <footer className="border-t border-border/50 mt-20">
         <div className="max-w-screen-xl mx-auto px-6 py-8 text-center">
           <p className="text-muted-foreground text-lg">
@@ -83,3 +117,4 @@ export default function Home() {
     </div>
   );
 }
+

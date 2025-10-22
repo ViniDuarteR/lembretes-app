@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format, isPast, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { fetchWithAuth } from '@/lib/api';
 
 // Interface para tipar os dados da consulta
 interface Consulta {
@@ -44,7 +45,7 @@ interface Consulta {
   compareceu?: boolean | null;
 }
 
-// Estado inicial do formulário (para limparmos depois)
+// Estado inicial do formulário
 const initialFormData = {
   paciente: "",
   especialidade: "",
@@ -54,48 +55,48 @@ const initialFormData = {
   endereco: ""
 };
 
+// Declarar apiUrl uma vez fora do componente
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 export default function Consultas() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
-
-  // Estados para controlar a lista e a interface
   const [consultas, setConsultas] = useState<Consulta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // NOVOS ESTADOS para controlar edição e deleção
   const [editingConsulta, setEditingConsulta] = useState<Consulta | null>(null);
   const [consultaToDelete, setConsultaToDelete] = useState<Consulta | null>(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
-  const apiUrl = import.meta.env.VITE_API_URL;
-  // Função para buscar os dados da API
+
+  // Função para buscar os dados da API (agora usa fetchWithAuth)
   const fetchConsultas = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/consultas`);
+      // 2. SUBSTITUIR fetch por fetchWithAuth
+      const response = await fetchWithAuth(`${apiUrl}/api/consultas`);
       if (!response.ok) throw new Error('Falha ao buscar consultas');
       const data = await response.json();
       setConsultas(data);
       setError(null);
-    } catch (err) {
+    } catch (err: any) { // Capturar erro corretamente
       console.error(err);
-      setError('Não foi possível carregar as consultas.');
+      // Evitar exibir erro 401 (tratado pelo fetchWithAuth) no toast
+      if (err.message !== 'Não autorizado ou token expirado.') {
+        setError('Não foi possível carregar as consultas.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Buscar os dados quando o componente for montado
   useEffect(() => {
     fetchConsultas();
   }, []);
 
-  // Função de Submissão ATUALIZADA para criar e editar
+  // Função de Submissão (agora usa fetchWithAuth)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const apiUrl = import.meta.env.VITE_API_URL;
-
     const dataHoraISO = new Date(`${formData.data}T${formData.hora}`).toISOString();
     const dataToSend = {
       paciente: formData.paciente,
@@ -104,37 +105,32 @@ export default function Consultas() {
       data: dataHoraISO,
       endereco: formData.endereco,
     };
-
     const url = editingConsulta
       ? `${apiUrl}/api/consultas/${editingConsulta.id}`
       : `${apiUrl}/api/consultas`;
-
     const method = editingConsulta ? 'PUT' : 'POST';
-
     try {
-      const response = await fetch(url, {
+      // 3. SUBSTITUIR fetch por fetchWithAuth
+      const response = await fetchWithAuth(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSend),
+        body: JSON.stringify(dataToSend)
       });
-
-      if (!response.ok) {
-        throw new Error(`Falha ao ${editingConsulta ? 'atualizar' : 'salvar'} a consulta`);
-      }
-
+      if (!response.ok) throw new Error(`Falha ao ${editingConsulta ? 'atualizar' : 'salvar'}`);
       toast.success(`Consulta ${editingConsulta ? 'atualizada' : 'agendada'} com sucesso!`);
       setShowAddDialog(false);
-      fetchConsultas();
-
-    } catch (err) {
+      fetchConsultas(); // Recarrega a lista
+    } catch (err: any) { // Capturar erro corretamente
       console.error(err);
-      toast.error(`Erro ao ${editingConsulta ? 'atualizar' : 'salvar'} consulta. Tente novamente.`);
+      // Evitar exibir erro 401 no toast
+      if (err.message !== 'Não autorizado ou token expirado.') {
+        toast.error(`Erro ao ${editingConsulta ? 'atualizar' : 'salvar'}.`);
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // NOVAS FUNÇÕES para controlar as ações
   const handleEditClick = (consulta: Consulta) => {
     setEditingConsulta(consulta);
     const dataObj = new Date(consulta.data);
@@ -149,39 +145,45 @@ export default function Consultas() {
     setShowAddDialog(true);
   };
 
+  // Função de Deleção (agora usa fetchWithAuth)
   const handleDeleteConfirm = async () => {
     if (!consultaToDelete) return;
-
-    const apiUrl = import.meta.env.VITE_API_URL;
-
     try {
-      const response = await fetch(`${apiUrl}/api/consultas/${consultaToDelete.id}`, {
-        method: 'DELETE',
-      });
+      // 4. SUBSTITUIR fetch por fetchWithAuth
+      const response = await fetchWithAuth(`${apiUrl}/api/consultas/${consultaToDelete.id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Falha ao deletar a consulta');
       toast.success("Consulta removida com sucesso!");
-      fetchConsultas();
-    } catch (error) {
-      toast.error("Erro ao remover consulta.");
+      fetchConsultas(); // Recarrega a lista
+    } catch (err: any) { // Capturar erro corretamente
+      console.error(err);
+      // Evitar exibir erro 401 no toast
+      if (err.message !== 'Não autorizado ou token expirado.') {
+        toast.error("Erro ao remover consulta.");
+      }
     } finally {
       setShowDeleteAlert(false);
       setConsultaToDelete(null);
     }
   };
 
+  // Função de Atualizar Status (agora usa fetchWithAuth)
   const handleUpdateStatus = async (id: string, status: boolean) => {
-    const apiUrl = import.meta.env.VITE_API_URL;
     try {
-      const response = await fetch(`${apiUrl}/api/consultas/${id}/status`, {
+      // 5. SUBSTITUIR fetch por fetchWithAuth
+      const response = await fetchWithAuth(`${apiUrl}/api/consultas/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ compareceu: status }),
       });
       if (!response.ok) throw new Error('Falha ao atualizar status');
       toast.success("Status da consulta atualizado!");
-      fetchConsultas();
-    } catch (err) {
-      toast.error("Erro ao atualizar status.");
+      fetchConsultas(); // Recarrega a lista
+    } catch (err: any) { // Capturar erro corretamente
+      console.error(err);
+      // Evitar exibir erro 401 no toast
+      if (err.message !== 'Não autorizado ou token expirado.') {
+       toast.error("Erro ao atualizar status.");
+      }
     }
   };
 
@@ -195,13 +197,14 @@ export default function Consultas() {
     return <div className="flex items-center justify-center min-h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
   }
 
+  // O JSX permanece o mesmo da versão anterior
   return (
     <div className="min-h-screen pb-24 bg-gradient-to-b from-background to-secondary/20">
       <header className="bg-card border-b border-border sticky top-0 z-10 shadow-sm">
         <div className="max-w-screen-xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3"><Heart className="h-10 w-10 text-primary fill-primary" /><h1 className="text-3xl font-bold">Consultas</h1></div>
-            <Button onClick={openAddDialog} size="lg" className="gap-2"><Plus className="h-5 w-5" /> Adicionar</Button>
+            <Button onClick={openAddDialog} size="lg" className="gap-2"><Plus className="h-5 w-5" /></Button>
           </div>
         </div>
       </header>
@@ -214,7 +217,6 @@ export default function Consultas() {
             {consultas.map((consulta) => {
               const consultaDate = parseISO(consulta.data);
               const isConsultaPast = isPast(consultaDate);
-
               return (
                 <div key={consulta.id} className="bg-card rounded-2xl p-6 border shadow-sm flex flex-col gap-3 relative">
                   <div className="absolute top-4 right-4">
@@ -235,14 +237,8 @@ export default function Consultas() {
                   </div>
                   <div className="flex items-center justify-between pr-8">
                     <span className="text-sm font-semibold text-primary uppercase">{format(consultaDate, "dd 'de' MMMM, yyyy 'às' HH:mm", { locale: ptBR })}</span>
-                    {consulta.compareceu === true && (
-                      <Badge className="bg-green-600 text-white hover:bg-green-600/80">
-                        Compareceu
-                      </Badge>
-                    )}
-                    {consulta.compareceu === false && (
-                      <Badge variant="destructive">Não Compareceu</Badge>
-                    )}
+                    {consulta.compareceu === true && <Badge className="bg-green-600 text-white hover:bg-green-600/80">Compareceu</Badge>}
+                    {consulta.compareceu === false && <Badge variant="destructive">Não Compareceu</Badge>}
                   </div>
                   <h3 className="text-2xl font-bold">{consulta.especialidade}</h3>
                   <p className="text-lg text-muted-foreground">Paciente: {consulta.paciente}</p>
@@ -277,3 +273,4 @@ export default function Consultas() {
     </div>
   );
 }
+
