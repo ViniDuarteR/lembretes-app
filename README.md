@@ -1,6 +1,6 @@
 # 💊 Lembretes de Saúde - Assistente Pessoal
 
-![Coração com um pulso a indicar cuidados de saúde](https://via.placeholder.com/800x300?text=Lembretes+de+Sa%C3%BAde)
+![Coração com um pulso a indicar cuidados de saúde](https://img.icons8.com/color/96/like--v1.png)
 
 Um aplicativo web completo (**Frontend + Backend**) desenvolvido para ajudar utilizadores e cuidadores a gerir compromissos médicos e a toma de medicamentos de forma simples, eficaz e personalizada.  
 A interface é **limpa, moderna e acessível**, ideal para todas as idades.
