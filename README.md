@@ -113,8 +113,9 @@ cd lembretes-app
 npm install
 
 # 3. Configure as variáveis de ambiente
-# Crie o ficheiro .env dentro de packages/backend com:
+ Crie o ficheiro .env dentro de packages/backend com:
 DATABASE_URL="postgresql://vinicius:password@localhost:5432/lembretes_db"
+
 JWT_SECRET="gere_uma_chave_secreta_forte_e_unica_aqui"
 FRONTEND_URL="http://localhost:5173"
 
