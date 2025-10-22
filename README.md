@@ -163,11 +163,6 @@ lembretes-app
 ```
 ---
 
-## 🧾 Licença
-Distribuído sob a **Licença MIT**.  
-Consulte o ficheiro LICENSE para mais informações (se aplicável).
-
----
 
 ## 💡 Autor
 👨‍💻 **Vinicius Duarte Rosa**  
