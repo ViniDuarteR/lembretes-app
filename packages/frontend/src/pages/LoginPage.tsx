@@ -101,7 +101,7 @@ export default function LoginPage() {
                 className="font-semibold text-primary hover:underline"
                 disabled={isLoading}
               >
-                Registe-se aqui
+                Registre-se aqui
               </button>
             </p>
           </form>
@@ -110,3 +110,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
